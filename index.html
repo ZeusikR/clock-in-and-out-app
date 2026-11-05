@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121c24">
+  <style>
+    :root {
+      --bg: #121c24;
+      --card: #1b2832;
+      --text: #ffffff;
+      --muted: #8ca0af;
+      --accent-in: #d4af37;
+      --accent-out: #5b7c4d;
+      --accent-btn: #738fa7;
+      --border: #263846;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .time-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .date-title {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .circles-row {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      gap: 20px;
+    }
+    .circle-btn {
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .circle-btn:active { transform: scale(0.95); }
+    .btn-in { background-color: var(--accent-in); color: #111; }
+    .btn-out { background-color: var(--accent-out); }
+
+    .columns-wrapper {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 15px;
+    }
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .time-block {
+      width: 100%;
+    }
+    .time-label {
+      font-size: 1.1rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .time-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.25;
+      cursor: pointer;
+      padding: 4px;
+      background: var(--card);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .time-desc span {
+      border-bottom: 1px dashed var(--muted);
+    }
+
+    .plus-btn {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: none;
+      background-color: var(--accent-btn);
+      color: white;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .plus-btn:active { transform: scale(0.95); }
+
+    .summary-card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .summary-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .summary-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+    .export-btn {
+      background-color: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .logs-list {
+      text-align: left;
+      margin-top: 12px;
+      font-size: 0.78rem;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Nagłówek Zegar i Data -->
+  <div class="header">
+    <div id="live-clock" class="time-title">00:00:00</div>
+    <div id="live-date" class="date-title">Ładowanie daty...</div>
+  </div>
+
+  <!-- Przyciski IN / OUT -->
+  <div class="circles-row">
+    <button class="circle-btn btn-in" onclick="pressIn()">IN</button>
+    <button class="circle-btn btn-out" onclick="pressOut()">OUT</button>
+  </div>
+
+  <!-- Główny układ kolumnowy (lewa: IN, prawa: OUT) -->
+  <div class="columns-wrapper">
+    
+    <!-- LEWA STRONA (IN) -->
+    <div class="column">
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('rawIn')">
+          <span id="txt-raw-in">Kliknij IN, aby zarejestrować czas</span>
+        </div>
+      </div>
+
+      <button class="plus-btn" onclick="add15m('In')">+15m</button>
+
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('adjIn')">
+          <span id="txt-adj-in">Czas IN po korekcie</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRAWA STRONA (OUT) -->
+    <div class="column">
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('rawOut')">
+          <span id="txt-raw-out">Kliknij OUT, aby zarejestrować czas</span>
+        </div>
+      </div>
+
+      <button class="plus-btn" onclick="add15m('Out')">+15m</button>
+
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('adjOut')">
+          <span id="txt-adj-out">Czas OUT po korekcie</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Podsumowanie tygodnia -->
+  <div class="summary-card">
+    <div class="summary-title">TOTAL FOR THE WEEK</div>
+    <div class="summary-desc">
+      Tutaj dodawaj wszystkie godziny z tygodnia. Pracujesz nocki, więc godziny liczą się od poniedziałku do niedzieli włącznie.
+    </div>
+    <div id="week-total" style="font-size: 1.3rem; font-weight: bold; color: var(--accent-in);">0h 0m</div>
+    
+    <div class="logs-list" id="logs-container">
+      <!-- Tutaj wpadają zapisane dni -->
+    </div>
+
+    <button class="export-btn" onclick="exportCSV()">Pobierz raport (CSV / Excel)</button>
+  </div>
+</div>
+
+<script>
+  let data = JSON.parse(localStorage.getItem('punch_data_v2')) || {
+    rawIn: null, rawOut: null, adjIn: null, adjOut: null, history: []
+  };
+
+  // Zegar na żywo
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+    document.getElementById('live-date').innerText = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+  }, 1000);
+
+  function updateUI() {
+    document.getElementById('txt-raw-in').innerText = data.rawIn ? `Zarejestrowano: ${data.rawIn}` : "Kliknij IN, aby zarejestrować czas";
+    document.getElementById('txt-raw-out').innerText = data.rawOut ? `Zarejestrowano: ${data.rawOut}` : "Kliknij OUT, aby zarejestrować czas";
+    document.getElementById('txt-adj-in').innerText = data.adjIn ? `Skorygowany: ${data.adjIn}` : "Czas IN po korekcie / edycji";
+    document.getElementById('txt-adj-out').innerText = data.adjOut ? `Skorygowany: ${data.adjOut}` : "Czas OUT po korekcie / edycji";
+
+    const logsContainer = document.getElementById('logs-container');
+    logsContainer.innerHTML = '';
+    
+    let totalMinutes = 0;
+
+    data.history.forEach((h, idx) => {
+      totalMinutes += h.minutes;
+      const div = document.createElement('div');
+      div.className = 'log-item';
+      div.innerHTML = `<span>${h.date} (${h.in} - ${h.out})</span> <b>${h.duration}</b> <span style="color:#ff6b6b; cursor:pointer;" onclick="delLog(${idx})">✖</span>`;
+      logsContainer.appendChild(div);
+    });
+
+    let th = Math.floor(totalMinutes / 60);
+    let tm = totalMinutes % 60;
+    document.getElementById('week-total').innerText = `${th}h ${tm}m`;
+
+    localStorage.setItem('punch_data_v2', JSON.stringify(data));
+  }
+
+  function pressIn() {
+    const now = new Date();
+    data.rawIn = now.toTimeString().slice(0,5);
+    data.adjIn = data.rawIn; 
+    updateUI();
+  }
+
+  function pressOut() {
+    const now = new Date();
+    data.rawOut = now.toTimeString().slice(0,5);
+    data.adjOut = data.rawOut;
+    updateUI();
+
+    // Automatyczny zapis po kliknięciu OUT (jeśli mamy oba czasy)
+    if (data.adjIn && data.adjOut) {
+      calculateAndSaveShift();
+    }
+  }
+
+  // Dodawanie 15 minut osobno dla IN lub OUT
+  function add15m(type) {
+    let keyRaw = type === 'In' ? 'adjIn' : 'adjOut';
+    
+    if (!data[keyRaw]) {
+      alert(`Najpierw ustaw czas dla ${type.toUpperCase()}!`);
+      return;
+    }
+    let [h, m] = data[keyRaw].split(':').map(Number);
+    m += 15;
+    if (m >= 60) { h = (h + 1) % 24; m -= 60; }
+    data[keyRaw] = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    updateUI();
+
+    if (data.adjIn && data.adjOut) {
+      calculateAndSaveShift();
+    }
+  }
+
+  function editTime(type) {
+    let val = prompt("Wpisz nowy czas (format HH:MM):", data[type] || "00:00");
+    if (val) {
+      data[type] = val;
+      updateUI();
+      if (data.adjIn && data.adjOut) calculateAndSaveShift();
+    }
+  }
+
+  function calculateAndSaveShift() {
+    let [inH, inM] = data.adjIn.split(':').map(Number);
+    let [outH, outM] = data.adjOut.split(':').map(Number);
+
+    let startMins = inH * 60 + inM;
+    let endMins = outH * 60 + outM;
+
+    // Obsługa nocki (przejście przez północ)
+    if (endMins < startMins) {
+      endMins += 24 * 60; 
+    }
+
+    let diff = endMins - startMins;
+    let hours = Math.floor(diff / 60);
+    let mins = diff % 60;
+
+    const todayStr = new Date().toLocaleDateString();
+    
+    data.history.push({
+      date: todayStr,
+      in: data.adjIn,
+      out: data.adjOut,
+      duration: `${hours}h ${mins}m`,
+      minutes: diff
+    });
+
+    updateUI();
+  }
+
+  function delLog(idx) {
+    data.history.splice(idx, 1);
+    updateUI();
+  }
+
+  function exportCSV() {
+    if (data.history.length === 0) {
+      alert("Brak danych do eksportu!");
+      return;
+    }
+    let csv = "Data;Start;Koniec;Czas\n";
+    data.history.forEach(h => {
+      csv += `${h.date};${h.in};${h.out};${h.duration}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "raport_czasu_pracy.csv";
+    link.click();
+  }
+
+  updateUI();
+</script>
+
+</body>
+</html>
