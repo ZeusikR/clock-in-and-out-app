@@ -33,11 +33,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
     }
     .header {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
     .time-title {
       font-size: 1.8rem;
@@ -45,7 +45,7 @@
       letter-spacing: 1px;
     }
     .date-title {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: var(--muted);
       margin-top: 4px;
     }
@@ -53,11 +53,11 @@
       display: flex;
       justify-content: space-around;
       width: 100%;
-      margin: 10px 0;
+      gap: 20px;
     }
     .circle-btn {
-      width: 110px;
-      height: 110px;
+      width: 105px;
+      height: 105px;
       border-radius: 50%;
       border: none;
       font-size: 1.3rem;
@@ -74,71 +74,93 @@
     .btn-in { background-color: var(--accent-in); color: #111; }
     .btn-out { background-color: var(--accent-out); }
 
-    .time-block {
+    .columns-wrapper {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 15px;
+    }
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
       text-align: center;
+    }
+
+    .time-block {
       width: 100%;
     }
     .time-label {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       letter-spacing: 1px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .time-desc {
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      line-height: 1.3;
-      padding: 0 10px;
+      line-height: 1.25;
       cursor: pointer;
+      padding: 4px;
+      background: var(--card);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .time-desc span {
       border-bottom: 1px dashed var(--muted);
     }
 
     .plus-btn {
-      width: 70px;
-      height: 70px;
+      width: 65px;
+      height: 65px;
       border-radius: 50%;
       border: none;
       background-color: var(--accent-btn);
       color: white;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      margin: 10px 0;
+      transition: transform 0.1s;
     }
+    .plus-btn:active { transform: scale(0.95); }
 
     .summary-card {
       background-color: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
+      padding: 16px;
       width: 100%;
       box-sizing: border-box;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 10px;
     }
     .summary-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: bold;
       letter-spacing: 1px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .summary-desc {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      margin-bottom: 15px;
-      line-height: 1.4;
+      margin-bottom: 12px;
+      line-height: 1.35;
     }
     .export-btn {
       background-color: var(--border);
       color: var(--text);
       border: none;
-      padding: 10px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
@@ -147,9 +169,9 @@
     }
     .logs-list {
       text-align: left;
-      margin-top: 15px;
-      font-size: 0.8rem;
-      max-height: 150px;
+      margin-top: 12px;
+      font-size: 0.78rem;
+      max-height: 130px;
       overflow-y: auto;
     }
     .log-item {
@@ -175,48 +197,56 @@
     <button class="circle-btn btn-out" onclick="pressOut()">OUT</button>
   </div>
 
-  <!-- Surowy Czas IN / OUT -->
-  <div style="display: flex; width: 100%; justify-content: space-between; gap: 10px;">
-    <div class="time-block" style="flex: 1;">
-      <div class="time-label">TIME</div>
-      <div class="time-desc" onclick="editTime('rawIn')">
-        <span id="txt-raw-in">Kliknij IN, aby zarejestrować czas startu</span>
+  <!-- Główny układ kolumnowy (lewa: IN, prawa: OUT) -->
+  <div class="columns-wrapper">
+    
+    <!-- LEWA STRONA (IN) -->
+    <div class="column">
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('rawIn')">
+          <span id="txt-raw-in">Kliknij IN, aby zarejestrować czas</span>
+        </div>
       </div>
-    </div>
-    <div class="time-block" style="flex: 1;">
-      <div class="time-label">TIME</div>
-      <div class="time-desc" onclick="editTime('rawOut')">
-        <span id="txt-raw-out">Kliknij OUT, aby zarejestrować koniec</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Przycisk +15m -->
-  <button class="plus-btn" onclick="add15m()">+15m</button>
+      <button class="plus-btn" onclick="add15m('In')">+15m</button>
 
-  <!-- Skorygowany Czas IN / OUT -->
-  <div style="display: flex; width: 100%; justify-content: space-between; gap: 10px;">
-    <div class="time-block" style="flex: 1;">
-      <div class="time-label">TIME</div>
-      <div class="time-desc" onclick="editTime('adjIn')">
-        <span id="txt-adj-in">Czas IN po korekcie</span>
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('adjIn')">
+          <span id="txt-adj-in">Czas IN po korekcie</span>
+        </div>
       </div>
     </div>
-    <div class="time-block" style="flex: 1;">
-      <div class="time-label">TIME</div>
-      <div class="time-desc" onclick="editTime('adjOut')">
-        <span id="txt-adj-out">Czas OUT po korekcie</span>
+
+    <!-- PRAWA STRONA (OUT) -->
+    <div class="column">
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('rawOut')">
+          <span id="txt-raw-out">Kliknij OUT, aby zarejestrować czas</span>
+        </div>
+      </div>
+
+      <button class="plus-btn" onclick="add15m('Out')">+15m</button>
+
+      <div class="time-block">
+        <div class="time-label">TIME</div>
+        <div class="time-desc" onclick="editTime('adjOut')">
+          <span id="txt-adj-out">Czas OUT po korekcie</span>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- Podsumowanie tygodnia -->
   <div class="summary-card">
     <div class="summary-title">TOTAL FOR THE WEEK</div>
     <div class="summary-desc">
-      Suma godzin z całego tygodnia (poniedziałek – niedziela), uwzględniając nocki przechodzące przez północ.
+      Tutaj dodawaj wszystkie godziny z tygodnia. Pracujesz nocki, więc godziny liczą się od poniedziałku do niedzieli włącznie.
     </div>
-    <div id="week-total" style="font-size: 1.4rem; font-weight: bold; color: var(--accent-in);">0h 0m</div>
+    <div id="week-total" style="font-size: 1.3rem; font-weight: bold; color: var(--accent-in);">0h 0m</div>
     
     <div class="logs-list" id="logs-container">
       <!-- Tutaj wpadają zapisane dni -->
@@ -227,7 +257,7 @@
 </div>
 
 <script>
-  let data = JSON.parse(localStorage.getItem('punch_data')) || {
+  let data = JSON.parse(localStorage.getItem('punch_data_v2')) || {
     rawIn: null, rawOut: null, adjIn: null, adjOut: null, history: []
   };
 
@@ -239,10 +269,10 @@
   }, 1000);
 
   function updateUI() {
-    document.getElementById('txt-raw-in').innerText = data.rawIn ? `Zarejestrowano: ${data.rawIn}` : "Tu wyświetl czas IN. Kliknij, aby zmienić.";
-    document.getElementById('txt-raw-out').innerText = data.rawOut ? `Zarejestrowano: ${data.rawOut}` : "Tu wyświetl czas OUT. Kliknij, aby zmienić.";
-    document.getElementById('txt-adj-in').innerText = data.adjIn ? `Skorygowany: ${data.adjIn}` : "Po dodaniu 15 min / edycji";
-    document.getElementById('txt-adj-out').innerText = data.adjOut ? `Skorygowany: ${data.adjOut}` : "Po dodaniu 15 min / edycji";
+    document.getElementById('txt-raw-in').innerText = data.rawIn ? `Zarejestrowano: ${data.rawIn}` : "Kliknij IN, aby zarejestrować czas";
+    document.getElementById('txt-raw-out').innerText = data.rawOut ? `Zarejestrowano: ${data.rawOut}` : "Kliknij OUT, aby zarejestrować czas";
+    document.getElementById('txt-adj-in').innerText = data.adjIn ? `Skorygowany: ${data.adjIn}` : "Czas IN po korekcie / edycji";
+    document.getElementById('txt-adj-out').innerText = data.adjOut ? `Skorygowany: ${data.adjOut}` : "Czas OUT po korekcie / edycji";
 
     const logsContainer = document.getElementById('logs-container');
     logsContainer.innerHTML = '';
@@ -257,17 +287,17 @@
       logsContainer.appendChild(div);
     });
 
-    const th = Math.floor(totalMinutes / 60);
-    const tm = totalMinutes % 60;
+    let th = Math.floor(totalMinutes / 60);
+    let tm = totalMinutes % 60;
     document.getElementById('week-total').innerText = `${th}h ${tm}m`;
 
-    localStorage.setItem('punch_data', JSON.stringify(data));
+    localStorage.setItem('punch_data_v2', JSON.stringify(data));
   }
 
   function pressIn() {
     const now = new Date();
     data.rawIn = now.toTimeString().slice(0,5);
-    data.adjIn = data.rawIn; // domyślnie równy surowemu
+    data.adjIn = data.rawIn; 
     updateUI();
   }
 
@@ -277,23 +307,29 @@
     data.adjOut = data.rawOut;
     updateUI();
 
-    // Jeśli mamy komplet IN i OUT, zapisz automatycznie do historii
+    // Automatyczny zapis po kliknięciu OUT (jeśli mamy oba czasy)
     if (data.adjIn && data.adjOut) {
       calculateAndSaveShift();
     }
   }
 
-  function add15m() {
-    if (!data.adjOut) {
-      alert("Najpierw ustaw czas OUT!");
+  // Dodawanie 15 minut osobno dla IN lub OUT
+  function add15m(type) {
+    let keyRaw = type === 'In' ? 'adjIn' : 'adjOut';
+    
+    if (!data[keyRaw]) {
+      alert(`Najpierw ustaw czas dla ${type.toUpperCase()}!`);
       return;
     }
-    let [h, m] = data.adjOut.split(':').map(Number);
+    let [h, m] = data[keyRaw].split(':').map(Number);
     m += 15;
     if (m >= 60) { h = (h + 1) % 24; m -= 60; }
-    data.adjOut = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    data[keyRaw] = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     updateUI();
-    calculateAndSaveShift();
+
+    if (data.adjIn && data.adjOut) {
+      calculateAndSaveShift();
+    }
   }
 
   function editTime(type) {
@@ -323,7 +359,6 @@
 
     const todayStr = new Date().toLocaleDateString();
     
-    // Sprawdź czy dzisiejszy wpis już istnieje, jak tak to zaktualizuj, jak nie to dodaj
     data.history.push({
       date: todayStr,
       in: data.adjIn,
